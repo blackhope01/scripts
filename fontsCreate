@@ -1,0 +1,306 @@
+#!/bin/bash
+# Aᴜᴛʜᴏʀ » UᴍᴜT KᴀRᴀ
+# https://t.me/umutkaratools
+version="v1.1"
+scriptStatus="True"
+
+w='\e[1;97m'
+r='\e[1;31m'
+g='\e[1;32m'
+y='\e[1;33m'
+scriptName=`basename "$0"`
+scriptNameCount=`echo "$scriptName" |wc -m`
+
+if [[ $1 == -e || $1 == --edit  ]];then
+	if [[ -a $PREFIX/bin/vim ]];then
+		vim $0
+	fi
+	exit
+fi
+
+if [[ $1 == -o || $1 == --open  ]];then
+	if [[ -a $PREFIX/bin/termux-open ]];then
+		termux-open $0
+	fi
+	exit
+fi
+
+if [[ ! -a $PREFIX/bin/curl ]];then
+	printf "\n\n\n${g}
+	\r\t╔═══════════════════╗
+	\r\t║ ✅ ${w}CᴜʀL Kᴜʀᴜʟᴜʏᴏʀ ${g}║
+	\r\t╚═══════════════════╝\n\n\n"
+	pkg install curl -y
+fi
+
+if [[ $0 != $PREFIX/bin/$scriptName ]];then
+	_scriptName="bash $scriptName"
+	bashBorder="═════"
+else
+	_scriptName="$scriptName"
+fi
+
+function _autoUpdate () {
+
+	# SCRİPT UPDATE
+
+	scriptVersion=$(curl -s https://raw.githubusercontent.com/Umutkara-tools/TermuxScripts/master/$scriptName |sed -n 4p |awk -F '"' '{print $2}')
+	
+	myScriptVersion=$(cat $0 |sed -n 4p |awk -F '"' '{print $2}')
+
+	if [[ $scriptVersion != $myScriptVersion ]];then
+
+		scriptStatus=$(curl -s https://raw.githubusercontent.com/Umutkara-tools/TermuxScripts/master/$scriptName |sed -n 5p |awk -F '"' '{print $2}')
+		if [[ $scriptStatus == True ]];then
+			clear
+			printf "\n\n\n"
+			read -e -p $'\t\e[1;97mYᴇɴɪ Gᴜɴᴄᴇʟʟᴇᴍᴇ Bᴜʟᴜɴᴅᴜ Sᴄʀɪᴘᴛ Gᴜɴᴄᴇʟʟᴇɴꜱɪɴ Mɪ? \e[33m[ʏ/N] \e[97m] \e[32m~ \e[31m»»\e[97m ' update
+			if [[ $update == y || $update == Y ]];then
+				curl -s https://raw.githubusercontent.com/Umutkara-tools/TermuxScripts/master/$scriptName > $0
+				printf "${g}
+				\r\t╔════════════════════════════════════════╗
+				\r\t║ ✅ ${w}Ｓｃｒｉｐｔ Ｇｕｎｃｅｌｌｅｎｄｉ ${g}║
+				\r\t╚════════════════════════════════════════╝\n\n\n"
+				exit
+			fi
+		fi
+	fi
+}
+
+_autoUpdate
+
+function _options () {
+	clear
+	printf "\n${r}
+	\r\t╔════════════════╗
+	\r\t║ ${w}Ｏｐｔｉｏｎｓ ${r}║ 
+	\r\t╚════════════════╝
+	\r\t\t     ${y}$version${y}\n
+	\r\t╔$bashBorder═══════════════════════════════════════════════╗
+	\r\t║ 🔸 ${w}$_scriptName -f false 'Example Word Output' ${y}║
+	\r\t╚$bashBorder═══════════════════════════════════════════════╝\n
+	\r\t╔$bashBorder═════════════════════════════════════════════════════════════╗
+	\r\t║ 🔸 ${w}$_scriptName -f thin 'Ｅxａｍｐｌｅ Wｏｒｄ Ｏｕｔｐｕｔ' ${y}║
+	\r\t╚$bashBorder═════════════════════════════════════════════════════════════╝\n
+	\r\t╔$bashBorder══════════════════════════════════════════════╗
+	\r\t║ 🔸 ${w}$_scriptName -f tiny 'Exᴀᴍᴘʟᴇ Wᴏʀᴅ Oᴜᴛᴘᴜᴛ' ${y}║
+	\r\t╚$bashBorder══════════════════════════════════════════════╝\n
+	\r\t╔$bashBorder═══════════════════════════════════════════════════╗
+	\r\t║ 🔸 ${w}$_scriptName -f monoSpace '𝙴x𝚊𝚖𝚙𝚕𝚎 W𝚘𝚛𝚍 𝙾𝚞𝚝𝚙𝚞𝚝' ${y}║
+	\r\t╚$bashBorder═══════════════════════════════════════════════════╝\n${g}
+	\r\t╔$bashBorder══════════════════════════════════════════════╗
+	\r\t║  ${w}$_scriptName --copy ${g}|${y} Sᴄʀɪᴘᴛ Cʀᴇᴀᴛᴇ Sʜᴏʀᴛᴄᴜᴛ ${g}║
+	\r\t╚$bashBorder══════════════════════════════════════════════╝\n\n\n"
+	exit
+}
+
+if [[ $1 == -c || $1 == --copy ]];then
+	
+	# Sᴄʀɪᴘᴛ Cʀᴇᴀᴛᴇ Sʜᴏʀᴛᴄᴜᴛ
+	if [[ ! -a $PREFIX/bin/$scriptName ]];then
+		cp $0 $PREFIX/bin
+		chmod 777 $PREFIX/bin/$0
+		printf "${g}
+		\r\t╔════════════════════════════════╗
+		\r\t║ ✅ ${w}Sᴄʀɪᴘᴛ Kɪꜱᴀʏᴏʟᴜ Oʟᴜꜱᴛᴜʀᴜʟᴅᴜ ${g}║
+		\r\t╚════════════════════════════════╝\n\n\n"
+		exit
+	else
+		printf "${g}
+		\r\t╔═══════════════════════════════════════╗
+		\r\t║ ✅ ${w}Sᴄʀɪᴘᴛ Kɪꜱᴀʏᴏʟᴜ Zᴀᴛᴇɴ Oʟᴜꜱᴛᴜʀᴜʟᴍᴜꜱ ${g}║
+		\r\t╚═══════════════════════════════════════╝\n\n\n"
+		if [[ $0 != $PREFIX/bin/$scriptName ]];then
+			read -e -p $'\t\e[1;97m[ \e[32mDᴇɢɪꜱᴛɪʀɪʟꜱɪɴ Mɪ? \e[33m[ʏ/N] \e[97m] \e[32m~ \e[31m»»\e[97m ' scriptChange
+			printf "\n\n\n"
+			if [[ $scriptChange == y || $scriptChange == Y ]];then
+				rm $PREFIX/bin/$scriptName
+				cp $0 $PREFIX/bin
+				chmod 777 $PREFIX/bin/$0
+
+				border="═"
+				if [[ -a $HOME/.result ]];then
+					rm $HOME/.result
+				fi
+				for count in `seq 1 $scriptNameCount`
+				do
+					printf "$border" >> $HOME/.result
+				done
+				border=$(cat $HOME/.result)
+
+				printf "${g}
+				\r\t╔════════════════════════╗
+				\r\t║ ✅ ${w}Sᴄʀɪᴘᴛ Dᴇɢɪꜱᴛɪʀɪʟᴅɪ ${g}║
+				\r\t╚════════════════════════╝\n${y}
+				\r\t╔$border════════════════════════════════╗
+				\r\t║ 🔸 ${w}Kɪꜱᴀʏᴏʟ Cᴀʟɪꜱᴛɪʀᴍᴀ Kᴏᴍᴜᴛᴜ »${g} $scriptName ${y}║
+				\r\t╚$border════════════════════════════════╝\n\n\n"
+			fi
+		fi
+		exit
+	fi
+fi
+
+
+
+if [[ $1 == "" || $1 != -f || $2 == "" || $3 == "" ]];then
+	_options
+fi
+
+word=$(echo -e "$3")
+
+_letters="abccdefgghiijklmnoopqrsstuuvwxyzABCCDEFGGHIIJKLMNOOPQRSSTUUVWXYZ1234567890"
+
+letters="abcçdefgğhıijklmnoöpqrsştuüvwxyzABCÇDEFGĞHİIJKLMNOÖPQRSŞTUÜVWXYZ1234567890"
+
+thinLetters="ａｂｃｃｄｅｆｇｇｈｉｉｊｋｌｍｎｏｏｐｑｒｓｓｔｕｕｖｗｘｙｚＡＢＣＣＤＥＦＧＧＨＩＩＪＫＬＭＮＯＯＰＱＲＳＳＴＵＵＶＷＸＹＺ１２３４５６７８９０"
+
+# SAYI PARANTEZ KARAKTERLER
+
+tinyLetters="ᴀʙᴄᴄᴅᴇғɢɢʜɪɪᴊᴋʟᴍɴᴏᴏᴘϙʀꜱꜱᴛᴜᴜᴠᴡxʏᴢABCCDEFGGHIIJKLMNOOPQRSSTUUVWXYZ𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶"
+
+monoSpaceLetters="𝚊𝚋𝚌𝚌𝚍𝚎𝚏𝚐𝚐𝚑𝚒𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚘𝚙𝚚𝚛𝚜𝚜𝚝𝚞𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙲𝙳𝙴𝙵𝙶𝙶𝙷𝙸𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙾𝙿𝚀𝚁𝚂𝚂𝚃𝚄𝚄𝚅𝚆𝚇𝚈𝚉𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶"
+
+Status="False"
+
+#fff forward font
+if [[ $2 == block ]];then
+	# Türkçe harfleri dönüştür
+	echo -e "\e[32m"
+	text=$(echo "$word" \
+	| tr '[:lower:]' '[:upper:]' \
+	| sed 's/Ç/C/g; s/Ğ/G/g; s/İ/I/g; s/I/I/g; s/Ö/O/g; s/Ş/S/g; s/Ü/U/g')
+
+	declare -A font
+
+	font[A]="  █████╗  ; ██╔══██╗ ; ███████║ ; ██╔══██║ ; ██║  ██║ ; ╚═╝  ╚═╝ "
+	font[B]="██████╗  ;██╔══██╗ ;██████╔╝ ;██╔══██╗ ;██████╔╝ ;╚═════╝  "
+	font[C]=" ██████╗ ;██╔════╝ ;██║      ;██║      ;╚██████╗ ; ╚═════╝ "
+	font[D]="██████╗  ;██╔══██╗ ;██║  ██║ ;██║  ██║ ;██████╔╝ ;╚═════╝  "
+	font[E]="███████╗ ;██╔════╝ ;█████╗   ;██╔══╝   ;███████╗ ;╚══════╝ "
+	font[F]="███████╗ ;██╔════╝ ;█████╗   ;██╔══╝   ;██║      ;╚═╝      "
+	font[G]=" ██████╗ ;██╔════╝ ;██║ ███╗ ;██║  ██║ ;╚██████╔╝; ╚═════╝ "
+	font[H]="██╗  ██╗ ;██║  ██║ ;███████║ ;██╔══██║ ;██║  ██║ ;╚═╝  ╚═╝ "
+	font[I]="██████╗  ; ╚██╔═╝  ;  ██║    ;  ██║    ;██████╗  ;╚═════╝  "
+	font[J]="     ██╗ ;     ██║ ;     ██║ ;██   ██║ ;╚█████╔╝ ; ╚════╝  "
+	font[K]="██╗ ██╗  ;██║██╔╝  ;█████╔╝  ;██╔═██╗  ;██║  ██╗ ;╚═╝  ╚═╝ "
+	font[L]="██╗      ;██║      ;██║      ;██║      ;███████╗ ;╚══════╝ "
+	font[M]="███╗   ███╗;████╗ ████║;██╔████╔██║;██║╚██╔╝██║;██║ ╚═╝ ██║;╚═╝     ╚═╝"
+	font[N]="███╗  ██╗ ;████╗ ██║ ;██╔██╗██║ ;██║╚████║ ;██║ ╚███║ ;╚═╝  ╚══╝ "
+	font[O]=" ██████╗  ;██╔═══██╗ ;██║   ██║ ;██║   ██║ ;╚██████╔╝ ; ╚═════╝  "
+	font[P]="██████╗  ;██╔══██╗ ;██████╔╝ ;██╔═══╝  ;██║      ;╚═╝      "
+	font[Q]=" ██████╗  ;██╔═══██╗ ;██║   ██║ ;██║▄▄ ██║ ;╚██████╔╝ ; ╚══▀▀═╝  "
+	font[R]="██████╗  ;██╔══██╗ ;██████╔╝ ;██╔══██╗ ;██║  ██║ ;╚═╝  ╚═╝ "
+	font[S]="███████╗ ;██╔════╝ ;███████╗ ;╚════██║ ;███████║ ;╚══════╝ "
+	font[T]="████████╗;╚══██╔══╝;   ██║   ;   ██║   ;   ██║   ;   ╚═╝   "
+	font[U]="██╗   ██╗ ;██║   ██║ ;██║   ██║ ;██║   ██║ ;╚██████╔╝ ; ╚═════╝  "
+	font[V]="██╗   ██╗ ;██║   ██║ ;██║   ██║ ;╚██╗ ██╔╝ ; ╚████╔╝  ;  ╚═══╝   "
+	font[W]="██╗    ██╗;██║    ██║;██║ █╗ ██║;██║███╗██║;╚███╔███╔╝; ╚══╝╚══╝ "
+	font[X]="██╗  ██╗ ;╚██╗██╔╝ ; ╚███╔╝  ; ██╔██╗  ;██╔╝ ██╗ ;╚═╝  ╚═╝ "
+	font[Y]="██╗   ██╗ ;╚██╗ ██╔╝ ; ╚████╔╝  ;  ╚██╔╝   ;   ██║   ;   ╚═╝   "
+	font[Z]="███████╗ ;╚══███╔╝ ;  ███╔╝  ; ███╔╝   ;███████╗ ;╚══════╝ "
+
+	for ((row=0; row<6; row++)); do
+    	line=""
+    	for ((i=0; i<${#text}; i++)); do
+        	c="${text:$i:1}"
+        	IFS=';' read -ra letters <<< "${font[$c]}"
+        	printf "%-12s" "${letters[$row]}"
+    	done
+    	echo
+	done
+	exit
+fi
+
+if [[ $2 == tiny ]];then
+	Status="True"
+	word=$(echo -e "$word" | sed "y/$letters/$tinyLetters/")
+fi
+
+if [[ $2 == monoSpace ]];then
+	Status="True"
+	word=$(echo -e "$word" | sed "y/$letters/$monoSpaceLetters/")
+fi
+
+if [[ $2 == false || $2 != thin ]];then
+	Status="True"
+fi
+
+wordCount=$(echo "🔸 $word " |wc -m)
+
+if [[ $2 == thin ]];then
+	Status="True"
+	word=$(echo -e "$word" | sed "y/$letters/$thinLetters/")
+	spaceCount=$(echo -e "$word"|sed '1s/[^ \t]//g' |wc -c)
+	wordCount=$(echo -e "$word" |wc -m)
+	pointCount=$(echo "$word" |grep -o '\.' |wc -l)
+	
+	let wordCount+=$wordCount
+
+	if [[ $spaceCount -gt 1 ]];then
+		let spaceCount-=3
+		let wordCount-=$spaceCount
+	else
+		let wordCount+=2
+	fi
+
+	let wordCount-=$pointCount
+fi
+
+if [[ $Status == False ]];then
+	_options
+fi
+
+border="═"
+if [[ -a $HOME/.result ]];then
+	rm $HOME/.result
+fi
+for count in `seq 0 $wordCount`
+do
+	printf "$border" >> $HOME/.result
+done
+border=$(cat $HOME/.result)
+
+clear
+printf "\n\n\n${y}
+\r\t╔$border╗
+\r\t║ 🔸 ${w}$word ${y}║
+\r\t╚$border╝\n\n\n"
+
+printf "\n\n\n${g}
+\r\t╔$border╗
+\r\t║ ✅ ${w}$word ${g}║
+\r\t╚$border╝\n\n\n"
+
+printf "\n\n\n${g}
+\r\t╔$border╗
+\r\t║ ❗ ${w}$word ${g}║
+\r\t╚$border╝\n\n\n"
+
+echo -e "\n\r\t──────────────\n"
+
+echo '
+printf "\n\n\n${y}
+\r\t╔'"$border"'╗
+\r\t║ 🔸 ${w}'"$word"' ${y}║
+\r\t╚'"$border"'╝\n\n\n"
+'
+printf "\n\n"
+
+echo '
+printf "\n\n\n${g}
+\r\t╔'"$border"'╗
+\r\t║ ✅ ${w}'"$word"' ${g}║
+\r\t╚'"$border"'╝\n\n\n"
+'
+printf "\n\n"
+
+echo '
+printf "\n\n\n${g}
+\r\t╔'"$border"'╗
+\r\t║ ❗ ${w}'"$word"' ${g}║
+\r\t╚'"$border"'╝\n\n\n"
+'
+printf "\n"
+
+echo -e "\n\r\t──────────────\n"
