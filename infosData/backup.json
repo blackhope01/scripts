@@ -1,0 +1,1120 @@
+[
+  {
+    "commandName": "find",
+    "data": [
+      {
+        "explanation": "Boş dizinleri sil.",
+        "command": "find -type d -empty -delete"
+      },
+      {
+        "explanation": "Boş dosyaları sil.",
+        "command": "find -type f -empty -delete"
+      },
+      {
+        "explanation": "Alt Dizinlerdeki tüm dosyaların satır sayısını bul.",
+        "command": "find test/ -type f |xargs cat 2>/dev/null |wc -l"
+      },
+      {
+        "explanation": "Alt Dizinlerdeki tüm dosyaları sil.",
+        "command": "find test/ -type f |xargs rm"
+      },
+      {
+        "explanation": "Dizinde arama yapma.",
+        "command": "find . -name \"*.txt\""
+      },
+      {
+        "explanation": "Bu komut, /dizin/yolu'ndaki 10 MB'tan büyük dosyaları arar.",
+        "command": "find /dizin/yolu -size +10M"
+      },
+      {
+        "explanation": "Bu komut, /dizin/yolu'ndaki dosyaları açar ve içerisinde \"aranan_metin\" ifadesini içeren dosyaları bulur.",
+        "command": "find /dizin/yolu -exec grep -l \"aranan_metin\" {} \\;"
+      },
+      {
+        "explanation": "Bu komut dizindeki tüm dosyaları bulur.Xargs ve grep ile hızlı arama yapar.",
+        "command": "find . -type f | xargs -P 8 -I {} grep -m1 \"^test\" {}"
+      }
+    ]
+  },
+  {
+    "commandName": "jq",
+    "data": [
+      {
+        "explanation": "Array içindeki nesnelerde arama yapma.",
+        "command": "jq '.[] |select(.commandName == \"test\" )' test.json"
+      },
+      {
+        "explanation": "Json nesne oluştur.",
+        "command": "jq -n '{\"commandName\": \"grep\", \"data\": {\"explanation\": \"Bu bir test komutudur.\", \"command\": \"grep 'test'\"}}'"
+      },
+      {
+        "explanation": "Array içindeki nesnelerin toplam sayısını bulma.",
+        "command": "jq \".[] |select(.commandName == \"$1\") | .data | length\" $dataFile"
+      },
+      {
+        "explanation": "Sonuç veride çift tırnakları kaldır.",
+        "command": "jq -r \".data\" test.json"
+      },
+      {
+        "explanation": "Nesne içindeki Array de index numarası ile anahtar bulma.",
+        "command": "jq -r '.[] | select(.commandName == \"find\" and .data[0].explanation != null) | .data[$i].explanation' infosData.json |tr -d '\\'"
+      },
+      {
+        "explanation": "Yeni nesne ekleme.",
+        "command": "jq -r '. += [{\"commandName\":\"'\"$1\"'\",\"data\":[{\"explanation\":\"'\"$explanation\"'\",\"command\":\"'\"$command\"'\"}]}]' $dataFile"
+      },
+      {
+        "explanation": "Nesne içine ekleme yapma.",
+        "command": "jq '. |= map(if .commandName == \"'\"$1\"'\" then .data += [{\"explanation\": \"'\"$explanation\"'\", \"command\": \"'\"$command\"'\"}] else . end)' $dataFile"
+      },
+      {
+        "explanation": "Nesne içindeki Array içindeki nesneyi index numarası ile silme.",
+        "command": "jq '.[] |= if .commandName == \"'\"$1\"'\" then del(.data['\"$3\"']) else . end' $dataFile"
+      },
+      {
+        "explanation": "Nesne içindeki array içindeki nesne anahtar değerini değiştirme.",
+        "command": "jq '.[] | select(.commandName == \"jq\") .data[2].command |= \"new\"' infosData.json"
+      },
+      {
+        "explanation": "Anahtar içindeki değeri değiştirme.",
+        "command": "jq '.[] | select(.commandName == \"jq\") .data[0].command |= sub(\"jq\"; \"json\")' infosData.json"
+      },
+      {
+        "explanation": "Filtreleme yapar != koşulu ile seçilen değerleri göstermez. Silme işlemi gibi uygulanabilir.",
+        "command": "jq 'map(select(.commandName != \"'\"$1\"'\"))' result.json"
+      },
+      {
+        "explanation": "Nesne içindeki Array de index numarası ile anahtar bulma.",
+        "command": "jq -r '.[] | select(.commandName == \"find\")| .data['0'].command' infosData.json"
+      }
+    ]
+  },
+  {
+    "commandName": "if",
+    "data": [
+      {
+        "explanation": "Dosyanın veya dizinin var olup olmadığını kontrol eder.",
+        "command": "if [[ -e sdcard/dosya.sh ]]; then"
+      },
+      {
+        "explanation": "Büyükse kontrolü yapılır.",
+        "command": "if [[ 3 -gt 2 ]];then"
+      },
+      {
+        "explanation": "Küçükse kontrolü yapılır.",
+        "command": "if [[ 2 -le 3 ]];then"
+      },
+      {
+        "explanation": "Değer varmı kontrolü yapılır.",
+        "command": "if [[ -n $test ]];then"
+      },
+      {
+        "explanation": "Dosya boş değilse kontrolü yapar.",
+        "command": "if [ -s test.txt ]; then"
+      },
+      {
+        "explanation": "Regex ile kontrol.",
+        "command": "if [[ $1 =~ (^-l$|^--log$) ]];then"
+      }
+    ]
+  },
+  {
+    "commandName": "zip",
+    "data": [
+      {
+        "explanation": "Dosyayı çıkarma.",
+        "command": "unzip dosya.zip"
+      },
+      {
+        "explanation": "Dosyayı sıkıştırma.",
+        "command": "zip -r dosya.zip dosya"
+      },
+      {
+        "explanation": "Dosyayı şifreli sıkıştırma.",
+        "command": "zip -r -P 1234 şifreli.zip dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "wc",
+    "data": [
+      {
+        "explanation": "Toplam satır sayısını bulur.",
+        "command": "wc -l dosya.txt"
+      },
+      {
+        "explanation": "Toplam karakter sayısını bulur.",
+        "command": "wc -m dosya.txt"
+      },
+      {
+        "explanation": "Toplam bayt sayısını bulur.",
+        "command": "wc -c dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "timeout",
+    "data": [
+      {
+        "explanation": "Belirtilen sürede kodu sonlandırır.",
+        "command": "timeout 1 bash test.sh"
+      }
+    ]
+  },
+  {
+    "commandName": "tr",
+    "data": [
+      {
+        "explanation": "Küçük harfleri büyük harflere dönüştürür.",
+        "command": "echo \"merhaba\" |tr '[a-z]' '[A-Z]'"
+      },
+      {
+        "explanation": "Belirtilen karakterleri siler.",
+        "command": "echo \"Araba\" |tr -d 'A'"
+      },
+      {
+        "explanation": "Ardışık tekrarlanan karakterleri kaldırır.",
+        "command": "echo -e \"test1 tttest2 tttest3\" |tr -s 't'"
+      }
+    ]
+  },
+  {
+    "commandName": "touch",
+    "data": [
+      {
+        "explanation": "Dosya oluşturma.",
+        "command": "touch dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "shuf",
+    "data": [
+      {
+        "explanation": "Rastgele satır yazdır.",
+        "command": "shuf -n 1 dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "seq",
+    "data": [
+      {
+        "explanation": "Belirtilen sayı aralıklarında yazdırmak.",
+        "command": "seq 1 100"
+      }
+    ]
+  },
+  {
+    "commandName": "sed",
+    "data": [
+      {
+        "explanation": "Kelime değiştirme.",
+        "command": "echo \"test\" | sed \"s/test/testt/g\""
+      },
+      {
+        "explanation": "Belirtilen satır aralarını veya satırı bulma.",
+        "command": "sed -n 1,5p dosya.txt"
+      },
+      {
+        "explanation": "Belirtilen satırlar bulununca sonlandır.",
+        "command": "sed -n '5p;5q' dosya.txt"
+      },
+      {
+        "explanation": "Tekrarlı boşlukları tek boşluk yapma.",
+        "command": "echo \"test       hey\" |sed 's/\\s\\s*/ /g'"
+      },
+      {
+        "explanation": "Karakter değiştirme",
+        "command": "echo \"test\" |sed 'y/t s e/T S E/'"
+      },
+      {
+        "explanation": "Birden fazla argüman kullanılır.",
+        "command": "sed -e \"s/test/TEST/g\" -e \"s/test2/TEST2/g\""
+      },
+      {
+        "explanation": "Regex ile aranan kelimeyi gruplandırıp sadece istenilen yeri değiştirme",
+        "command": "echo \"K. .a .r a.\" | sed 's/\\([A-Za-z]\\)\\./\\1/g'"
+      },
+      {
+        "explanation": "Gizli karakterleri gösterir.",
+        "command": "sed -n 'l' output.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "unrar",
+    "data": [
+      {
+        "explanation": "Dosya çıkarma.",
+        "command": "unrar x dosya.rar"
+      }
+    ]
+  },
+  {
+    "commandName": "php",
+    "data": [
+      {
+        "explanation": "Uzak sunucu açma.",
+        "command": "php -S 127.0.0.1:4444 & ngrok http 4444"
+      },
+      {
+        "explanation": "php -S 0.0.0.0:4444",
+        "command": "Aynı ağdaki kişilere de sunucu açma."
+      },
+      {
+        "explanation": "ssh ile uzak sunucu açma",
+        "command": "php -S 0.0.0.0:4444 & ssh -R 80:localhost:4444 serveo.net"
+      }
+    ]
+  },
+  {
+    "commandName": "nmap",
+    "data": [
+      {
+        "explanation": "Açık portları tarama.",
+        "command": "nmap --open 192.168.2.1"
+      },
+      {
+        "explanation": "Ağnı ağdaki ipleri  tarama.",
+        "command": "nmap 192.168.2.0/24"
+      },
+      {
+        "explanation": "Version tarama.",
+        "command": "nmap -sV 192.168.2.1"
+      },
+      {
+        "explanation": "Ping atmadan tarama.",
+        "command": "nmap -Pn 192.168.2.1"
+      }
+    ]
+  },
+  {
+    "commandName": "nc",
+    "data": [
+      {
+        "explanation": "Dinlenecek portu açma.",
+        "command": "nc -lvp 4444 -e /bin/sh"
+      },
+      {
+        "explanation": "Açılan portu dinleme.",
+        "command": "nc 192.168.2.1 4444"
+      },
+      {
+        "explanation": "Açılan port üzerinden mesajlaşma.",
+        "command": "nc -l 4444"
+      }
+    ]
+  },
+  {
+    "commandName": "lolcat",
+    "data": [
+      {
+        "explanation": "Hareketli rgb renklendirme.",
+        "command": "echo test |lolcat -a -d 100"
+      }
+    ]
+  },
+  {
+    "commandName": "killall",
+    "data": [
+      {
+        "explanation": "Programı zorla sonlandırma.",
+        "command": "kilall php | pkill php"
+      }
+    ]
+  },
+  {
+    "commandName": "grep",
+    "data": [
+      {
+        "explanation": "Büyük küçük harfe duyarsız.",
+        "command": "echo \"TEST\" |grep -i \"test\""
+      },
+      {
+        "explanation": "Satır numarasını gösterir.",
+        "command": "grep -n \"test\" dosya.txt"
+      },
+      {
+        "explanation": "Aranan kelime haricinde sonuç bulur.",
+        "command": "grep -v \"test\" dosya.txt"
+      },
+      {
+        "explanation": "Aranan kelimenin kaç adet olduğunu  bulur.",
+        "command": "grep -c \"test\" dosya.txt"
+      },
+      {
+        "explanation": "Sadece aranan kelimeyi bulup yazdırır.",
+        "command": "grep -o \"test\" dosya.txt"
+      },
+      {
+        "explanation": "Regex kullanımı yapılır.",
+        "command": "grep -E \"^test$\" dosya.txt"
+      },
+      {
+        "explanation": "Bulunan ilk satırda durur.",
+        "command": "grep -m1 \"^test\" dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "basename",
+    "data": [
+      {
+        "explanation": "Son / (slash) dan sonrasını alır.",
+        "command": "basename \"/sdcard/test/test.txt\""
+      }
+    ]
+  },
+  {
+    "commandName": "dirname",
+    "data": [
+      {
+        "explanation": "Son / (slash) hariç hepsini alır.",
+        "command": "dirname \"/sdcard/test/test.txt\""
+      }
+    ]
+  },
+  {
+    "commandName": "mkdir",
+    "data": [
+      {
+        "explanation": "Dizin yoksa oluşturur.",
+        "command": "mkdir -p test"
+      }
+    ]
+  },
+  {
+    "commandName": "du",
+    "data": [
+      {
+        "explanation": "Dizin ve dosya boyutunu yazar.",
+        "command": "du -sh *"
+      }
+    ]
+  },
+  {
+    "commandName": "for",
+    "data": [
+      {
+        "explanation": "0 dan 8 e kadar döngü.",
+        "command": "for i in {0..8}; do"
+      },
+      {
+        "explanation": "0 dan 8 e kadar 2 şer döngü.",
+        "command": "for i in {0..8..2}; do"
+      },
+      {
+        "explanation": "Karakterleri array olarak döngüde yazdırma.",
+        "command": "for letter in \"${letters[@]}\"; do"
+      }
+    ]
+  },
+  {
+    "commandName": "rm",
+    "data": [
+      {
+        "explanation": "-test tire işaretli dosya silme.",
+        "command": "rm -- -test.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "cat",
+    "data": [
+      {
+        "explanation": "Satır numaları ile yazdırma.",
+        "command": "cat -b test.txt"
+      },
+      {
+        "explanation": "Resim için zipli dosya gizleme.",
+        "command": "cat Resim.jpg yeni.zip > Yenizipliresim.jpg"
+      },
+      {
+        "explanation": "Özel karakteride gösterme.",
+        "command": "cat -v dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "cut",
+    "data": [
+      {
+        "explanation": "Belirtilen kolondaki kelimeleyi yazdırma.",
+        "command": "cut -d ' ' -f 3"
+      }
+    ]
+  },
+  {
+    "commandName": "am",
+    "data": [
+      {
+        "explanation": "Youtube aramayı açma.",
+        "command": "am start -a com.google.android.youtube.action.open.search"
+      },
+      {
+        "explanation": "Link açma.",
+        "command": "am start -a android.intent.action.VIEW https://www.google.com"
+      },
+      {
+        "explanation": "Google açma.",
+        "command": "am start -n com.android.chrome/com.google.android.apps.chrome.Main"
+      }
+    ]
+  },
+  {
+    "commandName": "yes",
+    "data": [
+      {
+        "explanation": "Belirtlen cümle veya kelimeyi belirtilen satır kadar yazdırma.",
+        "command": "yes \"123\" |head -n 50"
+      }
+    ]
+  },
+  {
+    "commandName": "sort",
+    "data": [
+      {
+        "explanation": "Alfabetik sırada yazdırır.",
+        "command": "sort dosya.txt"
+      },
+      {
+        "explanation": "Aynı satırları kaldırır.",
+        "command": "sort dosya-1.txt dosya-2.txt |uniq -u"
+      },
+      {
+        "explanation": "Aynı satırları siler sadece bir adet orjinal satırları bırakır",
+        "command": "sort file.csv |uniq"
+      },
+      {
+        "explanation": "Aynı satırları gösterir.",
+        "command": "sort file.csv |uniq -d"
+      }
+    ]
+  },
+  {
+    "commandName": "expr",
+    "data": [
+      {
+        "explanation": "Aritmetik işlemler yapılır.",
+        "command": "expr 1 + 1"
+      }
+    ]
+  },
+  {
+    "commandName": "dd",
+    "data": [
+      {
+        "explanation": "Belirtilen bayt değerine gôre yazdırma.",
+        "command": "dd if=data.txt bs=1 skip=5 count=5 2>/dev/null"
+      }
+    ]
+  },
+  {
+    "commandName": "free",
+    "data": [
+      {
+        "explanation": "Bellek kullanımını gösterir.",
+        "command": "free -h"
+      }
+    ]
+  },
+  {
+    "commandName": "df",
+    "data": [
+      {
+        "explanation": "Dosya sistemlerinin disk kullanımını gösterir.",
+        "command": "df -h"
+      }
+    ]
+  },
+  {
+    "commandName": "7z",
+    "data": [
+      {
+        "explanation": "Dosya çıkarma.",
+        "command": "7z x test.7z"
+      },
+      {
+        "explanation": "Şifreli dosya sıkıştırma.",
+        "command": "7z a test.7z test.txt -p\"blackhope_ukt\""
+      },
+      {
+        "explanation": "Şifreli dosya parametre ile çıkarma.",
+        "command": "7z x test.7z -p\"blackhope-ukt\""
+      }
+    ]
+  },
+  {
+    "commandName": "mysql",
+    "data": [
+      {
+        "explanation": "Mysql sunucu başlatma.",
+        "command": "mysqld"
+      },
+      {
+        "explanation": "Mariadb açma.",
+        "command": "mariadb -A -u root"
+      },
+      {
+        "explanation": "Terminal csv çıktısı.",
+        "command": "mariadb -A -u root -N -B -s -e \"SELECT CONCAT_WS(',', AD, SOYAD) FROM veritabanıAdı.tabloAdı LIMIT 1;\""
+      }
+    ]
+  },
+  {
+    "commandName": "bash",
+    "data": [
+      {
+        "explanation": "Değişkendeki harfleri küçük yapma.",
+        "command": "${test,,}"
+      },
+      {
+        "explanation": "Değişkendeki sayıyı arttırma.",
+        "command": "((linesCount++)) | ((linesCount+=5))"
+      },
+      {
+        "explanation": "Değişkene ekleme yapma.",
+        "command": "addText+=\"Hello\""
+      },
+      {
+        "explanation": "/usr/bin dizini kısayol değişkeni",
+        "command": "$PATH"
+      },
+      {
+        "explanation": "/usr dizini kısayol değişkeni",
+        "command": "$PREFIX"
+      },
+      {
+        "explanation": "printenv ve env komutları tüm çevre değişkenlerini listeler.",
+        "command": "printenv / env"
+      },
+      {
+        "explanation": "set komutu, hem çevre değişkenlerini hem de kabuk değişkenlerini gösterir.",
+        "command": "set"
+      },
+      {
+        "explanation": "Değişkenin adını başka bir değişken çıktısı ile belirleme",
+        "command": "${!sayi}"
+      }
+    ]
+  },
+  {
+    "commandName": "paste",
+    "data": [
+      {
+        "explanation": "Tüm satırları aralarında bir boşluk ile - - sayısına göre birleştirme",
+        "command": "cat test.txt |paste -d ' ' - -"
+      },
+      {
+        "explanation": "Tüm satırları aralarında bir boşluk ile birleştirme",
+        "command": "cat test.txt |paste -s -d ' '"
+      }
+    ]
+  },
+  {
+    "commandName": "EOF",
+    "data": [
+      {
+        "explanation": "Komuta otomatik veri yazdırma.",
+        "command": "ftp $HOST 21 <<EOF user $USER $PASSWORD EOF"
+      }
+    ]
+  },
+  {
+    "commandName": "ftp",
+    "data": [
+      {
+        "explanation": ".netrc dosyası ile otomatik giriş yapma.| machine ftpupload.net - login epiz_33286119 - password j5RDl5o8uyblJ",
+        "command": "ftp ftpupload.net 21"
+      }
+    ]
+  },
+  {
+    "commandName": "xargs",
+    "data": [
+      {
+        "explanation": "Satırları ikişer düzende sıralar.",
+        "command": "echo -e \"test1\\ ntest2\\ nntest3\\ ntest4\" | xargs -L2"
+      },
+      {
+        "explanation": "Standart çıktıdaki (stdin) dosyaları rm komutu ile bağlayıp siler.",
+        "command": "find test/ -type f |xargs rm"
+      },
+      {
+        "explanation": "Paralel sorgu ile hızlı arama yapar.",
+        "command": "find . -type f | xargs -P 8 -I {} grep -m1 \"^test\" {}"
+      }
+    ]
+  },
+  {
+    "commandName": "pwd",
+    "data": [
+      {
+        "explanation": "Geçerli çalışma dizin yolunu gösterir.",
+        "command": "pwd -p"
+      }
+    ]
+  },
+  {
+    "commandName": "curl",
+    "data": [
+      {
+        "explanation": "Durum kodu çıktısı alma.",
+        "command": "curl -s -w '%{http_code}' ifconfig.co -o /dev/null"
+      },
+      {
+        "explanation": "Sunucuya veri gönderme.",
+        "command": "curl -d \"key1=value1&key2=value2\" [URL]"
+      },
+      {
+        "explanation": "Sitenin geri gönderdiği HTTP başlıklarını kaydeder.",
+        "command": "curl -D [URL]"
+      },
+      {
+        "explanation": "Header ve useragent ekleme.",
+        "command": "curl -H \"Content-Type:application/x-www-form-urlencoded; charset=UTF-8\" -A \"Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) GSA/7.0.55539 Mobile/12H143 Safari/600.1.4\" -H \"Pragma: no-cache\" -H \"Accept: */*\""
+      }
+    ]
+  },
+  {
+    "commandName": "ps",
+    "data": [
+      {
+        "explanation": "Sistemde çalışan herşeyi gösterir.",
+        "command": "ps aux"
+      }
+    ]
+  },
+  {
+    "commandName": "server",
+    "data": [
+      {
+        "explanation": "Http sunucu açma.",
+        "command": "python -m http.server 4444"
+      },
+      {
+        "explanation": "Php sunucu açma.",
+        "command": "php -S 127.0.0.1:4444"
+      }
+    ]
+  },
+  {
+    "commandName": "tee",
+    "data": [
+      {
+        "explanation": "Standart çıktıyı dosyaya yazar.",
+        "command": "python -m http.server 4444 2>&1 | tee -a server_log.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "tail",
+    "data": [
+      {
+        "explanation": "Son satır yazdırma.",
+        "command": "tail -n 1 file.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "nproc",
+    "data": [
+      {
+        "explanation": "Mevcut işlemci çekirdek sayısını alır.",
+        "command": "nproc"
+      }
+    ]
+  },
+  {
+    "commandName": "awk",
+    "data": [
+      {
+        "explanation": "Aynı olan satırları silme",
+        "command": "awk '!seen[$0]++' file.txt"
+      },
+      {
+        "explanation": "Sütunları aynı olan satırları silme",
+        "command": "awk -F, '!seen[$0]++' file.txt"
+      },
+      {
+        "explanation": "2 dosya arasında kolon eşleşmesi olanlarî yazdırma.",
+        "command": "awk -F, 'NR==FNR {years[$1]; next} $1 in years' 1dosya.txt 2dosya.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "gcc",
+    "data": [
+      {
+        "explanation": "C dosya derleme",
+        "command": "gcc search.c -o search"
+      }
+    ]
+  },
+  {
+    "commandName": "sqlite3",
+    "data": [
+      {
+        "explanation": "Tablo oluşturma.",
+        "command": "sqlite3 test.db 'create table test (id text primary key, adı text, soyadı text);'"
+      },
+      {
+        "explanation": "Sütun indexleme",
+        "command": "CREATE INDEX idx_adi ON test (ADI);"
+      },
+      {
+        "explanation": "Sorgu",
+        "command": "sqlite3 -csv test.db 'select * from test where adi=\"umut\" and soyadi=\"kara\" and yas like \"%2000%\"'"
+      },
+      {
+        "explanation": "Csv dosya import etme",
+        "command": "sqlite3 test.db \".mode csv\" \"create table test (id text primary key, adı text, soyadı text);\" \".import output.csv test\""
+      },
+      {
+        "explanation": "Tablonun hepsini yazdırma",
+        "command": "sqlite3 -json test.db \"select * from test;\""
+      },
+      {
+        "explanation": "Sorgu çıktısına kolon ekleme",
+        "command": "sqlite3 -csv test.db \"SELECT 'KENDİSİ' AS Yakınlık, * FROM test WHERE ADI = 'Umut';\""
+      },
+      {
+        "explanation": "Tabloya veri ekleme",
+        "command": "sqlite3 test.db \"INSERT INTO test (id, adı, soyadı) VALUES (2, 'Umut', 'Kara');\""
+      },
+      {
+        "explanation": "Tablodaki tüm verileri silme",
+        "command": "DELETE FROM test;"
+      },
+      {
+        "explanation": "Tabloda belirli bir satırı silme",
+        "command": "DELETE FROM test WHERE adı = 'Umut';"
+      },
+      {
+        "explanation": "Tabloda belirli bir koşula göre silme",
+        "command": "DELETE FROM test WHERE adı = 'Ahmet' AND soyadı = 'Demir';"
+      },
+      {
+        "explanation": "Tabloyu siler",
+        "command": "DROP TABLE test;"
+      },
+      {
+        "explanation": "Tablo yapısını gösterir",
+        "command": ".schema test"
+      },
+      {
+        "explanation": "Tablo toplam satır sayısı gösterir",
+        "command": "sqlite3 test.db \"select count(*) from test;\""
+      },
+      {
+        "explanation": "İndex sorgularını optimize eder.",
+        "command": "sqlite3 adData.db \"ANALYZE;\""
+      },
+      {
+        "explanation": "Sorgu da kullanılan indexi gösterir.",
+        "command": "sqlite3 adData.db \"EXPLAIN QUERY PLAN select * from adData where ADI='TEST' AND SOYADI='TEST' AND ADRES_IL='İSTANBUL'\""
+      }
+    ]
+  },
+  {
+    "commandName": "eval",
+    "data": [
+      {
+        "explanation": "Değişken içinde değişken adı ekleme. | eval arg=\"$1\"",
+        "command": "eval \"arg=\\${$num}\""
+      }
+    ]
+  },
+  {
+    "commandName": "history",
+    "data": [
+      {
+        "explanation": "Tüm geçmişi siler.",
+        "command": "history clear"
+      },
+      {
+        "explanation": "Girilen kelimenin olduğu tüm geçmişleri siler",
+        "command": "echo all | history -d test"
+      }
+    ]
+  },
+  {
+    "commandName": "excel",
+    "data": [
+      {
+        "explanation": "A1 referansı ile model ve versiyona göre arama yapma.",
+        "command": "=EĞER(A1:A750=\"\"; \"\";EĞER(UZUNLUK(A1:A750)<>18; \"HATALI BARKOD\"; EĞERHATA(EĞER(BUL(PARÇAAL(A$1; 1; 12); A1:A750); \"✓\"); \"BULUNAMADI\")))"
+      },
+      {
+        "explanation": "A1 referansı ile modele göre arama yapma.",
+        "command": "=EĞER(A1:A750=\"\"; \"\";EĞER(UZUNLUK(A1:A750)<>18; \"HATALI BARKOD\"; EĞERHATA(EĞER(BUL(PARÇAAL(A$1; 1; 9); A1:A750); \"✓\"); \"BULUNAMADI\")))"
+      },
+      {
+        "explanation": "C1 referansı ile arama yapma.",
+        "command": "=EĞER(A1:A750=\"\"; \"\"; EĞERHATA(EĞER(BUL(C$1; A1:A750); \"✓\"); \"BULUNAMADI\"))"
+      },
+      {
+        "explanation": "C sütunu ile çoklu arama yapma",
+        "command": "=EĞER(C$1 = \"\"; \"C SÜTUNUNA VERİ GİRİLMEDİ\"; EĞER(A1:A750=\"\"; \"\";EĞERHATA(İNDİS(C:C; KAÇINCI(A1:A750; C:C; 0)); \"X\")))"
+      },
+      {
+        "explanation": "(Model kontrol) A1 içine girilen barkodun 1 ve 9. karakterine kadar olan sayıyı referans alarak okutulan barkodların farklı barkod olup olmadığını kontrol eder, tekrar eden barkodları tespit eder ve girilen palet sayısına göre palet doldu yazar.",
+        "command": "=EĞER(A1:A750=\"\"; \"\";EĞER(UZUNLUK(A1:A750)<>18; \"HATALI BARKOD\"; EĞERHATA(EĞER(BUL(PARÇAAL(A$1; 1; 9); A1:A750); EĞER(SATIR(A1:A750)=KAÇINCI(A1:A750; A$1:A$750; 0); EĞER(MOD(SATIR(A1:A750);10)=0;\"PALET DOLDU\";\"✓\"); \"ZATEN OKUTULDU\")); \"FARKLI MODEL\")))"
+      },
+      {
+        "explanation": "(Versiyon kontrol) A1 içine girilen barkodun 1 ve 12. karakterine kadar olan sayıyı referans alarak okutulan barkodların farklı barkod olup olmadığını kontrol eder, tekrar eden barkodları tespit eder ve girilen palet sayısına göre palet doldu yazar.",
+        "command": "=EĞER(A1:A750=\"\"; \"\";EĞER(UZUNLUK(A1:A750)<>18; \"HATALI BARKOD\"; EĞERHATA(EĞER(BUL(PARÇAAL(A$1; 1; 12); A1:A750); EĞER(SATIR(A1:A750)=KAÇINCI(A1:A750; A$1:A$750; 0); EĞER(MOD(SATIR(A1:A750);10)=0;\"PALET DOLDU\";\"✓\"); \"ZATEN OKUTULDU\")); \"FARKLI MODEL\")))"
+      },
+      {
+        "explanation": "TEST",
+        "command": "=EĞER(A1=\"\";\"\";EĞER(UZUNLUK(A1)<>18;\"HATALI BARKOD\";EĞER(KAÇINCI(A1;A$1:A1;0)<SATIR(); \"ZATEN OKUTULDU\"; EĞER(EĞERSAY(A$1:A$750;\"*\"&PARÇAAL(A1;1;9)&\"*\")>1; \"FARKLI MODEL\"; EĞER(MOD(SATIR();10)=0;\"PALET DOLDU\";\"✓\")))))"
+      }
+    ]
+  },
+  {
+    "commandName": "pip",
+    "data": [
+      {
+        "explanation": "Yüklenen modül listesini gösterir.",
+        "command": "pip list"
+      },
+      {
+        "explanation": "Modülü araması yapar ve modül hakkında bilgi verir.",
+        "command": "pip search qrcode"
+      }
+    ]
+  },
+  {
+    "commandName": "bat",
+    "data": [
+      {
+        "explanation": "cat komutundan gelişmiş bir şekilde yazdırma ve büyük dosyaları belirli satırlad halinde yazdırma.",
+        "command": "bat test.txt"
+      }
+    ]
+  },
+  {
+    "commandName": "exiftool",
+    "data": [
+      {
+        "explanation": "Resim içinde olan bilgileri gôsterme",
+        "command": "exiftool test.png"
+      }
+    ]
+  },
+  {
+    "commandName": "identify",
+    "data": [
+      {
+        "explanation": "Resim içinde olan bilgileri gôsterme",
+        "command": "identify --verbose test.png"
+      }
+    ]
+  },
+  {
+    "commandName": "NOTLAR",
+    "data": [
+      {
+        "explanation": "Mobil de javascript kodunu yer isaretlerine ekleyip uzantı kullanma.",
+        "command": "bookmarklet code"
+      },
+      {
+        "explanation": "Özel ad link kısaltma siteleri.",
+        "command": "tinyurl.com | v.gd | is.gd "
+      },
+      {
+        "explanation": "Anonim dosya paylaşım sitesi.",
+        "command": "biteblob.com"
+      },
+      {
+        "explanation": "Açık kaynak araçlar",
+        "command": "https://canine.tools/services"
+      }
+    ]
+  },
+  {
+    "commandName": "streamlink",
+    "data": [
+      {
+        "explanation": "Sitedeki film veya canlı yayının doğrudan linkini alır.",
+        "command": "streamlink --stream-url atv.com.tr/canli-yayin best"
+      }
+    ]
+  },
+  {
+    "commandName": "pkill",
+    "data": [
+      {
+        "explanation": "Çalışan araçları sonlandırma",
+        "command": "pkill mysqld"
+      }
+    ]
+  },
+  {
+    "commandName": "chsh",
+    "data": [
+      {
+        "explanation": "Terminal varsayılan kabuk belirleme",
+        "command": "chsh -s fish"
+      }
+    ]
+  },
+  {
+    "commandName": "vim",
+    "data": [
+      {
+        "explanation": "Sayfa başı",
+        "command": "gg"
+      },
+      {
+        "explanation": "Sayfa sonu",
+        "command": "G"
+      },
+      {
+        "explanation": "Satır silme",
+        "command": "dd"
+      },
+      {
+        "explanation": "Satır kopyalama",
+        "command": "yy"
+      },
+      {
+        "explanation": "Kopyalanan veya silinen metni yapıştırma",
+        "command": "p"
+      },
+      {
+        "explanation": "Geri alma",
+        "command": "u"
+      },
+      {
+        "explanation": "İleri alma",
+        "command": "ctrl + r or :redo"
+      },
+      {
+        "explanation": "Metin seçme",
+        "command": "v"
+      },
+      {
+        "explanation": "Satırlarda belli aralıkta metin seçme",
+        "command": "ctrl + v"
+      }
+    ]
+  },
+  {
+    "commandName": "mariadb",
+    "data": [
+      {
+        "explanation": "Mariadb kurulum.",
+        "command": "pkg install mariadb -y && mysql_install_db --user=mysql"
+      }
+    ]
+  },
+  {
+    "commandName": "kill",
+    "data": [
+      {
+        "explanation": "Sekmeyi kapat fish kabuğunda geçerli.",
+        "command": "kill -9 $fish_pid"
+      },
+      {
+        "explanation": "Uygulamayı kapat.",
+        "command": "kill -9 $TERMUX_APP_PID"
+      }
+    ]
+  },
+  {
+    "commandName": "tmate",
+    "data": [
+      {
+        "explanation": "Uzak bağlantı için ssh sunucu başlatır.",
+        "command": "tmate -F"
+      }
+    ]
+  },
+  {
+    "commandName": "ssh",
+    "data": [
+      {
+        "explanation": "ssh başlatma port 22",
+        "command": "sudo service ssh restart"
+      },
+      {
+        "explanation": "Bağlantı kurma",
+        "command": "ssh u0_a95@100.67.27.89 -p 8022"
+      },
+      {
+        "explanation": "Şifresiz bağlantı kurma (Şifre dosyası oluşturup karşı tarafa gönderme )",
+        "command": "ssh-keygen && ssh-copy-id -p 8022 u0_a95@100.67.27.89"
+      },
+      {
+        "explanation": "Uzak bağlantı için gereken uygulama",
+        "command": "tailscale"
+      },
+      {
+        "explanation": "Dosya gönderme",
+        "command": "scp -P 8022 dosya.txt u0_a95@100.67.27.89:/data/data/com.termux/files/home"
+      },
+      {
+        "explanation": "Klasör gönderme",
+        "command": "scp -P 8022 -r klasör u0_a95@100.67.27.89:/data/data/com.termux/files/home"
+      },
+      {
+        "explanation": "ssh ile uzak sunucu açma",
+        "command": "php -S 0.0.0.0:4444 & ssh -R 80:localhost:4444 serveo.net"
+      }
+    ]
+  },
+  {
+    "commandName": "magick",
+    "data": [
+      {
+        "explanation": "Resim oluşturma",
+        "command": "magick -size 1000x1200 xc:white -font ~/.fonts/DejaVuSansMono.ttf -pointsize 16 -fill black -annotate +20+40 \"@result.txt\" output.png"
+      },
+      {
+        "explanation": "Font yükleme ( DejavuSansMono.ttf olmalı aynı hizada olması için )",
+        "command": "mkdir -p $HOME/.fonts && cd $HOME/.fonts && wget https://sourceforge.net/projects/dejavu/files/dejavu/2.37/dejavu-fonts-ttf-2.37.zip -O dejavu-2.37.zip && unzip dejavu-2.37.zip && mv dejavu-2.37/ttf/DejavuSansMono.ttf $HOME/.fonts"
+      },
+      {
+        "explanation": "Kurulum",
+        "command": "pkg install imagemagick"
+      }
+    ]
+  },
+  {
+    "commandName": "asciinema",
+    "data": [
+      {
+        "explanation": "Kayıt yap.",
+        "command": "asciinema rec"
+      },
+      {
+        "explanation": "Belirlenen dosya adı ile kayıt yap..",
+        "command": "asciinema rec test.cast"
+      },
+      {
+        "explanation": "Oynat",
+        "command": "asciinema play test.cast"
+      }
+    ]
+  },
+  {
+    "commandName": "pass",
+    "data": [
+      {
+        "explanation": "keepass",
+        "command": "Sir_@(_9123_)"
+      }
+    ]
+  },
+  {
+    "commandName": "fish",
+    "data": [
+      {
+        "explanation": "terminal değişkenleri ônbellek resetleme",
+        "command": "set -e fish_user_paths && set -e PATH && source ~/.config/fish/config.fish"
+      }
+    ]
+  }
+]

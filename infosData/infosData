@@ -1,0 +1,443 @@
+#!/bin/bash
+
+# VARİABLES | START
+
+t='✅'
+f='❗'
+i='🔸'
+w='\e[1;97m'
+r='\e[1;31m'
+g='\e[1;32m'
+y='\e[1;33m'
+b='\e[1;34m'
+c='\e[1;36m'
+
+scriptName=$(basename $0)
+dataHomeLocation="/sdcard/.CodingLab/Termux_Configuration/scripts/infosData"
+dataFile="$dataHomeLocation/infosData.json"
+backupdataFile="$dataHomeLocation/backup.json"
+tempdataFile="$dataHomeLocation/temp.json"
+
+# VARİABLES | END
+
+# PACKAGE CONTROL | START
+
+if [[ ! -a "$PATH/jq" ]]; then
+    echo -e "\n\n${w}jq komutu bulunamadı. ${r}[ ! ]${w}\n\nPaket kuruluyor..."
+    pkg install jq -y
+    exit
+fi
+
+# PACKAGE CONTROL | END
+
+# ARGUMENTS CONTROL & HELP MESSAGE | START 
+
+if [[ ! -n $@ ]]; then
+    clear
+    echo -e "\n\n${g}
+    \r\t██   ██ ███████ ██      ██████ 
+    \r\t██   ██ ██      ██      ██   █  
+    \r\t███████ █████   ██      ██████  
+    \r\t██   ██ ██      ██      ██     
+    \r\t██   ██ ███████ ███████ ██ \n\n
+    \r${r} ───────────────────────────────────────────\n\n${g}
+    \r${g} $scriptName ${w}echo${w}\n
+    \r${g} $scriptName ${w}grep ${y}( -a | --add ) ${w}\n
+    \r${g} $scriptName ${w}grep ${y}( -a | --add ) ${b}\"finds messages\" \"grep 'test' test.txt\" ${w}\n
+    \r${g} $scriptName ${w}grep ${y}( -dc | --delCommand ) ${w}\n
+    \r${g} $scriptName ${w}grep ${y}( -dd | --delData ) ${c}[INDEX_NUMBER] ${w}\n
+    \r${g} $scriptName ${y}( -A | --all ) ${w}\n
+    \r${g} $scriptName ${y}( -A ${w}\"searchWord\"${y} | --all ${w}\"searchWord\"${y}) ${w}\n
+    \r${g} $scriptName ${y}( -ac | --allCommand ) ${w}\n
+    \r${g} $scriptName ${y}( -rd | --restoreData ) ${w}\n
+    "
+    exit
+fi
+
+# ARGUMENTS CONTROL & HELP MESSAGE | END
+
+# dataFile CHECK | START 
+
+if [[ ! -a $dataFile ]]; then
+    mkdir -p "$dataHomeLocation"
+    echo -e "[]" > $dataFile
+fi
+
+# dataFile CHECK | END
+
+#########################
+# FUNCTIONS | START
+
+printMessage () {
+
+    # PARAMATERS : [MESSAGE] [font-family] [ red | green | yellow | noFrame ]
+
+    if [[ ! -n $1 ]]; then
+        printMessage "$f Mesaj girilmedi."
+        exit
+    fi
+    letters="abcçdefgğhıijklmnoöpqrsştuüvwxyzABCÇDEFGĞHİIJKLMNOÖPQRSŞTUÜVWXYZ1234567890"
+    tinyLetters="ᴀʙᴄᴄᴅᴇғɢɢʜɪɪᴊᴋʟᴍɴᴏᴏᴘϙʀꜱꜱᴛᴜᴜᴠᴡxʏᴢABCCDEFGGHIIJKLMNOOPQRSSTUUVWXYZ𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶"
+    thinLetters="ａｂｃｃｄｅｆｇｇｈｉｉｊｋｌｍｎｏｏｐｑｒｓｓｔｕｕｖｗｘｙｚＡＢＣＣＤＥＦＧＧＨＩＩＪＫＬＭＮＯＯＰＱＲＳＳＴＵＵＶＷＸＹＺ１２３４５６７８９０"
+    monoSpaceLetters="𝚊𝚋𝚌𝚌𝚍𝚎𝚏𝚐𝚐𝚑𝚒𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚘𝚙𝚚𝚛𝚜𝚜𝚝𝚞𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙲𝙳𝙴𝙵𝙶𝙶𝙷𝙸𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙾𝙿𝚀𝚁𝚂𝚂𝚃𝚄𝚄𝚅𝚆𝚇𝚈𝚉𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿𝟶"
+
+    border="═"
+    message="$1"
+
+    if [[ ! -n $2 ]]; then
+        message=$(echo -e "$message" |sed "y/$letters/$tinyLetters/")
+    fi
+
+    if [[ $2 == "tiny" ]]; then
+        message=$(echo -e "$message" |sed "y/$letters/$tinyLetters/")
+    fi
+
+    if [[ $2 == "thin" ]]; then
+        message=$(echo -e "$message" |sed "y/$letters/$thinLetters/")
+    fi
+
+    if [[ $2 == "monoSpace" ]]; then
+        message=$(echo -e "$message" |sed "y/$letters/$monoSpaceLetters/")
+    fi
+
+
+    messageCount=$(echo -e "$message" |wc -m)
+    messageLineCount=$(echo -e "$message" |wc -l)
+
+    if [[ $message =~ ($t|$f|$i) ]];then
+        ((messageCount+=1))
+    fi
+    
+    for count in $(seq 1 $messageCount); do
+        border+="═"
+    done
+   
+    # centerBox=""
+    # for i in $(seq 1 $messageLineCount); do
+    #
+    #     _message=$(echo -e "$message" |sed -n ${i}p)
+    #
+    #     if [[ $i == "1" ]]; then
+    #         centerBox="\r ║ ${w}$_message \t${g}║"
+    #     else
+    #         centerBox+="\n\r ║ ${w}$_message \t${g}║"
+    #     fi
+    #
+    #     if [[ $messageLineCount == "1" ]]; then
+    #         centerBox="\r ║ ${w}$_message ${g}║"
+    #     fi
+    #
+    # done
+
+
+    if [[ $3 == "red" ]]; then
+        echo -e "\n\n${r}\r ╔$border╗\n\r ║${w} $message ${r}║\n\r ╚$border╝\n\n"
+    fi
+    if [[ $3 == "yellow" ]]; then
+        echo -e "\n\n${y}\r ╔$border╗\n\r ║${w} $message ${y}║\n\r ╚$border╝\n\n"
+    fi
+    if [[ $3 == "green" || $2 == "" ]]; then
+        echo -e "\n\n${g}\r ╔$border╗\n\r ║ ${w}$message ${g}║\n\r ╚$border╝\n\n"
+    fi
+
+    if [[ $3 == "noFrame" ]]; then
+        echo -e "\n\n\r ${w}$message\n"
+    fi
+}
+
+handleError() {
+   
+   # PARAMATERS : "METHOD" "VARIABLE" "MESSAGE"
+
+   if [[ $1 == "variableCheck" ]]; then
+       if [[ $2 == "" && $2 != "null" ]]; then
+           printMessage "$3"
+           exit
+       fi
+   else
+       printMessage "$f Eksik Veya Hatalı Parametre Girildi. [ handleError ]"
+       exit
+   fi
+
+}
+
+savedataFile() {
+    
+    # PARAMATERS : "DATA"
+
+    handleError "variableCheck" "$1" "$f Yeni data girilmedi. [ savedataFile ]"
+
+    cat "$dataFile" > $backupdataFile
+
+    echo "$1" > $tempdataFile
+
+    cat "$tempdataFile" > $dataFile
+
+    rm $tempdataFile
+
+    if [[ -a $sdcardTermux ]]; then
+        mkdir -p "${sdcardTermux}/infosData"
+        cp $dataHomeLocation/* $sdcardTermux/infosData/
+    fi
+
+}
+
+commandCheck () {
+
+    # PARAMATERS : "COMMAND NAME" "true | false |status"
+
+    handleError "variableCheck" "$1" "$f Komut adı girilmedi. [ queryCommand ]"
+
+    query=$(jq ".[] |select(.commandName == \"$1\")" $dataFile)
+
+    if [[ $2 == "true" ]]; then
+        handleError "variableCheck" "$query" "$f $1 bulunamadı."
+    fi
+     
+    if [[ $2 == "false" ]]; then
+        handleError "variableCheck" "$query" "$i $1 zaten kayıtlı.."
+    fi
+
+    if [[ -n $query ]]; then
+        status="true"
+    else
+        status="false"
+    fi
+}
+
+queryCommand () {
+
+    # PARAMATERS : "COMMAND NAME"  "noStop"
+
+    commandCheck "$1" "true"
+
+    linesTotal=$(jq ".[] |select(.commandName == \"$1\") | .data | length" $dataFile)
+
+    commandName="$1"
+    capitalizedCommandName="$(tr '[:lower:]' '[:upper:]' <<< ${commandName:0:1})${commandName:1}"
+    
+    if [[ ! -n $3 ]]; then
+        printMessage "$capitalizedCommandName"
+        echo -e "\r ${r}───────────────────────────\n\n"
+    fi
+
+    for ((i = 0; i < $linesTotal; i++)); do
+
+        #explanation=$(jq -r ".[] | select(.commandName == \"$1\" and .data[0].explanation != null) | .data[$i].explanation" $dataFile )
+
+        #command=$(jq -r ".[] | select(.commandName == \"$1\" and .data[0].command != null) | .data[$i].command" $dataFile)
+        
+        explanation=$(jq -r '.[] | select(.commandName == "'"$1"'")| .data['"$i"'].explanation' $dataFile)
+        
+        command=$(jq -r '.[] | select(.commandName == "'"$1"'")| .data['"$i"'].command' $dataFile)
+        
+        handleError "variableCheck" "$explanation" "$f explanation anahtarı bulunamadı. [ queryCommand ]"
+  
+        handleError "variableCheck" "$command" "$f command anahtarı bulunamadı. [ queryCommand ]"
+
+
+        if [[ $2 == "noStop" && $3 != "" ]]; then
+
+            search=$(echo "$explanation $command" |grep -i "$3")
+
+
+            if [[ -n $search ]]; then
+                echo -e "\r ${r}[${y} $commandName${r} -${w} $i${r} ]${w} $explanation\n\n\r ${r}+ ${g}$command${w} ${r}${w}\n\n"
+                ((searchCount++))
+            fi
+        else
+                echo -e "\r ${r}[${w}$i${r}]${w} $explanation\n\n\r ${r}+ ${g}$command${w} ${r}${w}\n\n"
+
+        fi
+
+    done
+
+    if [[ $2 != "noStop" ]]; then
+        printMessage "Total : $linesTotal" "tiny" "yellow"
+        exit
+    fi
+}
+
+
+addCommand () {
+
+    # PARAMATERS : "COMMAND NAME" "EXPLANATION" "COMMAND"
+     
+    commandCheck "$1" "status"
+    
+    handleError "variableCheck" "$2" "$f Açıklama girilmedi."
+
+    handleError "variableCheck" "$3" "$f Komut girilmedi."
+   
+    if [[ $status == "false" ]]; then
+        
+        explanation=$(echo "$2"|sed 's/"/\\\"/g')
+        command=$(echo "$3"|sed 's/"/\\\"/g')
+
+        newdataFile=$(jq -r '. += [{"commandName":"'"$1"'","data":[{"explanation":"'"$explanation"'","command":"'"$command"'"}]}]' $dataFile)
+
+        savedataFile "$newdataFile"
+
+    else
+        
+        explanation=$(echo "$2"|sed 's/"/\\\"/g')
+        command=$(echo "$3"|sed 's/"/\\\"/g')
+      
+        newdataFile=$(jq '. |= map(if .commandName == "'"$1"'" then .data += [{"explanation": "'"$explanation"'", "command": "'"$command"'"}] else . end)' $dataFile)
+        
+        savedataFile "$newdataFile"
+
+    fi
+    
+    queryCommand "$1"
+
+    exit
+}
+
+delCommand () {
+
+    # PARAMATERS :  "commandName" "command | data" "dataİndex"
+     
+    commandCheck "$1" "true"
+
+    handleError "variableCheck" "$2" "$f Silme methodu girilmedi."
+
+    if [[ $2 == "command" ]]; then
+
+        newdataFile=$(jq 'map(select(.commandName != "'"$1"'"))' $dataFile)
+        
+        savedataFile "$newdataFile"
+
+        printMessage "$t $1 Silindi."
+
+    fi
+
+    if [[ $2 == "data" ]]; then
+        
+        handleError "variableCheck" "$3" "$f Data index numarası girilmedi."
+        
+        linesTotal=$(jq ".[] |select(.commandName == \"$1\") | .data | length" $dataFile)
+        
+        ((linesTotal--))
+
+        if [[ $3 -gt $linesTotal ]]; then
+
+            handleError "variableCheck" "$error" "$f Hatalı data index numarası girildi."
+            
+        fi
+        
+        newdataFile=$(jq '.[] |= if .commandName == "'"$1"'" then del(.data['"$3"']) else . end' $dataFile)
+    
+        savedataFile "$newdataFile"
+    
+        queryCommand "$1"
+
+    fi
+
+    exit
+}
+
+
+# FUNCTIONS | END
+#########################
+
+if [[ $2 =~ (^-a$|^--add$) ]];then
+    # PARAMATERS : "COMMAND NAME" "EXPLANATION" "COMMAND"
+    addCommand "$1" "$3" "$4"
+    exit
+fi
+
+if [[ $2 =~ (^-dc$|^--delCommand$) ]];then
+    # PARAMATERS :  "commandName" "command | data" "dataİndex"
+    delCommand "$1" "command"
+    exit
+fi
+
+if [[ $2 =~ (^-dd$|^--delData$) ]];then
+    # PARAMATERS :  "commandName" "command | data" "dataİndex"
+    delCommand "$1" "data" "$3"
+    exit
+fi
+
+if [[ $1 =~ (^-A$|^--all$) ]];then
+    
+    commandsTotalCount=$(jq -r '.[] .commandName' $dataFile |wc -l)
+    
+    if [[ -n $2 ]]; then
+
+        searchCount=0
+        
+        echo -e "\n\n${g}Ｓｅａｒｃｈ...\n\n\r${g} ───────────────────────────${w}\n\n"
+
+        for c in $(seq 1 $commandsTotalCount); do
+            commandName=$(jq -r '.[] .commandName' $dataFile |sed -n ${c}p)
+            queryCommand "$commandName" "noStop" "$2"
+        done
+
+        printMessage "Total : $searchCount" "tiny" "yellow"
+        exit
+
+    fi
+
+    for c in $(seq 1 $commandsTotalCount); do
+        commandName=$(jq -r '.[] .commandName' $dataFile |sed -n ${c}p)
+        if [[ -n $2 ]]; then
+            queryCommand "$commandName" "noStop" "$2"
+        else
+            queryCommand "$commandName" "noStop"            
+            echo -e "\n\r${b} ───────────────────────────"
+        fi
+    done
+
+    printMessage "Total : $commandsTotalCount" "tiny" "yellow"
+    exit
+fi
+
+if [[ $1 =~ (^-ac$|^--allCommand$) ]];then
+    # jq -r '.[] .commandName' result.json |paste -s -d ' '
+
+    commandsTotalCount=$(jq -r '.[] .commandName' $dataFile |wc -l)
+    
+    echo -e "\n"
+    for c in $(seq 1 $commandsTotalCount); do
+
+        commandName=$(jq -r '.[] .commandName' $dataFile |sed -n ${c}p)
+
+        commandNameTotal=$(jq '.[] |select(.commandName == "'"$commandName"'") | .data | length' $dataFile)
+
+        echo -e "\n\r ${r}[${w} $c ${r}]${g} $commandName ${y}(${w} $commandNameTotal ${y})${w}\n"
+
+    done
+    
+    echo -e "\n\r${b} ───────────────"
+
+    printMessage "Total : $commandsTotalCount" "tiny" "yellow"
+
+    exit
+
+fi
+
+if [[ $2 =~ (^-rd$|^--restoreData$) ]];then
+
+    if [[ -a $backupdataFile ]]; then
+        cat "$backupdataFile" > $dataFile
+        printMessage "$t Yedek Veriler Geri Yüklendi."
+    else
+        printMessage "$f Yedek Dosya Bulunamadı."
+    fi
+    
+    exit
+fi
+
+queryCommand "$1"
+
+
+# TÜM VERİLERİ TEK SATIR YAPMA
+# cat 3result.json | jq -c
+
+# ÇİFT TIRNAK KALDIRMA
+# cat 3result.json | jq -c -r '.commandName'
+
+# CSV JSON DÖNÜŞTÜRME
+# cat veri.csv | jq -Rn '[inputs | . / "," | { "ADI": .[0], "SOYADI": .[1] }]'
+

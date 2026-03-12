@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import os
+import re
+import time
+import signal
+import subprocess
+from urllib.parse import urlparse
+
+# Renkler
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+CYAN = "\033[96m"
+RESET = "\033[0m"
+BOLD = "\033[1m"
+
+# --- KURULUM FONKSİYONU ---
+def run_setup():
+    print(f"{BLUE}{BOLD}[*] m3uChecker Kurulum Modu Başlatıldı...{RESET}")
+    required_packages = ['cloudscraper', 'requests', 'urllib3']
+    
+    for package in required_packages:
+        try:
+            __import__(package)
+            print(f"{GREEN}[✔] {package} zaten kurulu.{RESET}")
+        except ImportError:
+            print(f"{YELLOW}[!] {package} bulunamadı, kuruluyor...{RESET}")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    
+    print(f"\n{GREEN}{BOLD}[+] Kurulum başarıyla tamamlandı!{RESET}")
+    print(f"{CYAN}Kullanım: m3uChecker <dosya_veya_url>{RESET}")
+    sys.exit(0)
+
+# Kütüphane Kontrolü (Çalıştırmadan önce)
+try:
+    import cloudscraper
+except ImportError:
+    if len(sys.argv) > 1 and sys.argv[1] == "setup":
+        run_setup()
+    else:
+        print(f"{RED}[!] Gerekli kütüphaneler eksik!{RESET}")
+        print(f"{YELLOW}Kurmak için şunu yazın: {RESET}{BOLD}m3uChecker setup{RESET}")
+        sys.exit(1)
+
+# --- SİNYAL VE ÇIKIŞ ---
+def force_exit(sig, frame):
+    print(f"\n\n{RED}[!] İşlem durduruldu. Çıkış yapılıyor...{RESET}")
+    os._exit(0)
+
+signal.signal(signal.SIGINT, force_exit)
+
+class M3UChecker:
+    def __init__(self):
+        self.scraper = cloudscraper.create_scraper(
+            browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
+        )
+        self.stats = {"aktif": 0, "hata": 0, "logo_ok": 0, "logo_hata": 0}
+
+    def clean_ansi(self, text):
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        return ansi_escape.sub('', text)
+
+    def format_cell(self, text, width, color=RESET):
+        clean = self.clean_ansi(text)
+        # Emojiler terminalde 2 karakter genişliğinde göründüğü için dengeleme
+        emoji_count = len(re.findall(r'[✅❌🚫⚠️]', text))
+        clean_len = len(clean) + emoji_count
+        diff = width - clean_len
+        return f"{color}{text}{' ' * max(0, diff)}{RESET}"
+
+    def check_link(self, url, is_logo=False):
+        if not url or not url.startswith("http"):
+            return f"{YELLOW}⚠️ YOK{RESET}"
+        try:
+            resp = self.scraper.head(url, timeout=3, allow_redirects=True)
+            if resp.status_code >= 400:
+                resp = self.scraper.get(url, timeout=3, stream=True)
+            
+            if resp.status_code == 200:
+                if is_logo: self.stats["logo_ok"] += 1
+                else: self.stats["aktif"] += 1
+                return f"{GREEN}✅ OK{RESET}"
+            status = f"❌ {resp.status_code}"
+        except:
+            status = "🚫 HATA"
+        
+        if is_logo: self.stats["logo_hata"] += 1
+        else: self.stats["hata"] += 1
+        return f"{RED}{status}{RESET}"
+
+    def run(self, target):
+        if target == "setup": run_setup()
+        
+        try:
+            if urlparse(target).scheme in ('http', 'https'):
+                print(f"{BLUE}[*] Uzak liste çekiliyor...{RESET}")
+                content = self.scraper.get(target).text
+            else:
+                print(f"{BLUE}[*] Yerel dosya okunuyor...{RESET}")
+                with open(target, 'r', encoding='utf-8') as f:
+                    content = f.read()
+        except Exception as e:
+            print(f"{RED}[!] Hata: {e}{RESET}")
+            return
+
+        lines = content.split('\n')
+        channels = []
+        current_info = {}
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith("#EXTINF:"):
+                tags = dict(re.findall(r'(\S+?)="([^"]*?)"', line))
+                current_info = {
+                    'logo': tags.get('tvg-logo', '').strip(),
+                    'group': tags.get('group-title', 'Genel').strip(),
+                    'name': line.split(',')[-1].strip() if ',' in line else "Bilinmiyor"
+                }
+            elif line.startswith("http"):
+                if current_info:
+                    current_info['url'] = line
+                    channels.append(current_info)
+                    current_info = {}
+
+        if not channels:
+            print(f"{RED}[!] Kanal bulunamadı!{RESET}")
+            return
+
+        print(f"{GREEN}[+] {len(channels)} kanal bulundu.{RESET}\n")
+        
+        # Tablo Başlığı
+        print(f"{BOLD}{'KATEGORİ':<16} | {'KANAL İSMİ':<30} | {'YAYIN':<12} | {'POSTER'}{RESET}")
+        print("-" * 75)
+
+        for ch in channels:
+            s_status = self.check_link(ch['url'])
+            l_status = self.check_link(ch['logo'], is_logo=True)
+            
+            # Sütunları Hizalı Yazdır
+            c_cat = self.format_cell(ch['group'][:15], 16, CYAN)
+            c_name = self.format_cell(ch['name'][:29], 30)
+            c_st = self.format_cell(s_status, 12)
+            c_post = self.format_cell(l_status, 10)
+
+            print(f"{c_cat} | {c_name} | {c_st} | {c_post}")
+            time.sleep(0.01)
+
+        self.print_summary()
+
+    def print_summary(self):
+        print(f"\n{BOLD}{'='*45}")
+        print(f"{BLUE}📊 ÖZET RAPOR")
+        print(f"{GREEN}   YAYIN:  {self.stats['aktif']} AKTİF")
+        print(f"{RED}   YAYIN:  {self.stats['hata']} HATALI")
+        print(f"{YELLOW}   POSTER: {self.stats['logo_ok']} OK / {self.stats['logo_hata']} HATA")
+        print(f"{BOLD}{'='*45}{RESET}")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(f"\n{YELLOW}Kullanım:{RESET} m3uChecker <dosya_veya_url>")
+        print(f"{CYAN}Kurulum:{RESET} m3uChecker setup")
+    else:
+        M3UChecker().run(sys.argv[1])
+

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# --- [ RENK VE STİL TANIMLAMALARI ] ---
+G='\033[1;32m'    # Başarı (Parlak Yeşil)
+C='\033[1;36m'    # Bilgi (Turkuaz)
+W='\033[1;37m'    # Beyaz
+R='\033[1;31m'    # Hata (Kırmızı)
+Y='\033[1;33m'    # Uyarı (Sarı)
+GR='\033[1;30m'   # Parlak Siyah / Koyu Gri (Daha belirgin)
+NC='\033[1;0m'      # Renk Sıfırla
+BOLD='\033[1m'
+
+clear
+
+# --- [ LOGO / HEADER ] ---
+echo -e "${G}┌──────────────────────────────────────────────────────────────────┐${NC}"
+echo -e "${G}│${NC}  ${C}██████╗███████╗██████╗     ██████╗ ██╗   ██╗██╗██╗     ██████╗ ${NC} ${G}│${NC}"
+echo -e "${G}│${NC} ${C}██╔════╝██╔════╝╚════██╗    ██╔══██╗██║   ██║██║██║     ██╔══██╗${NC} ${G}│${NC}"
+echo -e "${G}│${NC} ${C}██║     ███████╗ █████╔╝    ██████╔╝██║   ██║██║██║     ██║  ██║${NC} ${G}│${NC}"
+echo -e "${G}│${NC} ${C}██║     ╚════██║ ╚═══██╗    ██╔══██╗██║   ██║██║██║     ██║  ██║${NC} ${G}│${NC}"
+echo -e "${G}│${NC} ${C}╚██████╗███████║██████╔╝    ██████╔╝╚██████╔╝██║███████╗██████╔╝${NC} ${G}│${NC}"
+echo -e "${G}└─────────────────────────────────────────────────── ${G}BUILDER v2${NC} ──┘${NC}"
+
+# --- [ PARAMETRE KONTROLÜ ] ---
+if [ -z "$1" ]; then
+    echo -e "\n  ${R}✖ HATA:${NC} Proje ismi girmediniz."
+    echo -e "  ${Y}Kullanım:${NC} ./deploy.sh ${G}<ProjeAdı>${NC}\n"
+    exit 1
+fi
+
+PROJECT="$1"
+CS3_FILE="$PROJECT/build/$PROJECT.cs3"
+
+# --- [ ADIM 1: GRADLE DERLEME ] ---
+echo -e "\n${BOLD}${C}󱁤 ADIM 1:${NC} ${W}GRADLE DERLEME BAŞLATILDI${NC}"
+echo -e "  ${GR}Hedef Proje:${NC} ${BOLD}${W}$PROJECT${NC}"
+echo -e "  ${GR}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+# Gradle çıktısını doğrudan veriyoruz (Hataları görmek için)
+./gradlew :$PROJECT:make --no-daemon --build-cache
+
+if [ $? -eq 0 ]; then
+    echo -e "  ${GR}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${G}✔ BAŞARILI:${NC} Derleme işlemi hatasız tamamlandı."
+else
+    echo -e "  ${GR}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${R}✘ HATA:${NC} Derleme başarısız! Yukarıdaki çıktıları inceleyin."
+    exit 1
+fi
+
+# --- [ ADIM 2: AKTARIM ] ---
+echo -e "\n${BOLD}${C}󱁤 ADIM 2:${NC} ${W}EKLENTİ AKTARILIYOR${NC}"
+
+if [ ! -f "$CS3_FILE" ]; then
+    echo -e "  ${R}✘ HATA:${NC} Derleme başarılı görünse de ${W}$CS3_FILE${NC} bulunamadı."
+    exit 1
+fi
+
+mkdir -p /sdcard/Cloudstream3/plugins/
+cp "$CS3_FILE" /sdcard/Cloudstream3/plugins/ 2>/dev/null
+
+if [ $? -eq 0 ]; then
+    echo -e "  ${G}✔ AKTARILDI:${NC} ${W}/sdcard/Cloudstream3/plugins/${NC}"
+else
+    echo -e "  ${R}✘ HATA:${NC} Yazma izni reddedildi."
+    exit 1
+fi
+
+# --- [ ADIM 3: ONAY VE BAŞLATMA ] ---
+echo -e "\n${BOLD}${C}󱁤 ADIM 3:${NC} ${W}UYGULAMA BAŞLATMA${NC}"
+echo -e "  Devam etmek için ${G}[ENTER]${NC} tuşuna basın, iptal için ${R}[CTRL+C]${NC}"
+echo -ne "  ${C}❯${NC} "
+
+read -r
+
+echo -e "  ${C}󱊔 Başlatılıyor...${NC}"
+am start -n com.lagradost.cloudstream3.prerelease/com.lagradost.cloudstream3.MainActivity > /dev/null 2>&1
+
+echo -e "\n${G}✨ İŞLEM TAMAMLANDI!${NC}\n"
+
